@@ -43,14 +43,33 @@ class ImageGenerationRequest(BaseModel):
             }
         }
 
+# Video generation request model
+class VideoGenerationRequest(BaseModel):
+    prompt: str = Field(..., description="Text prompt to generate video from", min_length=1)
+    model: str = Field(
+        "Wan-AI/Wan2.2-T2V-A14B",
+        description="Model to use for video generation"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "prompt": "A young man walking on the street",
+                "model": "Wan-AI/Wan2.2-T2V-A14B"
+            }
+        }
+
 @app.get("/")
 async def root():
     """Root endpoint - API information"""
     return {
-        "message": "HuggingFace Image Generator API",
+        "message": "HuggingFace Image & Video Generator API",
         "docs": "/docs",
-        "generate_endpoint": "/generate (POST)",
-        "health_endpoint": "/health (GET)"
+        "endpoints": {
+            "image_generation": "/generate (POST)",
+            "video_generation": "/generate-video (POST)",
+            "health_check": "/health (GET)"
+        }
     }
 
 @app.get("/health")
@@ -105,6 +124,57 @@ async def generate_image(request: ImageGenerationRequest):
         raise HTTPException(
             status_code=500,
             detail=f"Image generation failed: {str(e)}"
+        )
+
+@app.post("/generate-video")
+async def generate_video(request: VideoGenerationRequest):
+    """
+    Generate a video from a text prompt using text-to-video models
+
+    Returns the video directly as an MP4 file
+    """
+    try:
+        # Check if HF_TOKEN is set
+        if not os.environ.get("HF_TOKEN"):
+            raise HTTPException(
+                status_code=500,
+                detail="HF_TOKEN environment variable not set"
+            )
+
+        # Generate video using Hugging Face Inference API
+        video = client.text_to_video(
+            request.prompt,
+            model=request.model,
+        )
+
+        # The text_to_video method returns a file path to the generated video
+        # We need to read the video file and stream it back
+        if isinstance(video, str):
+            # If video is a file path, read it
+            with open(video, "rb") as video_file:
+                video_bytes = io.BytesIO(video_file.read())
+        elif isinstance(video, bytes):
+            # If video is already bytes
+            video_bytes = io.BytesIO(video)
+        else:
+            # If video is a file-like object
+            video_bytes = io.BytesIO(video.read())
+
+        video_bytes.seek(0)
+
+        # Return video as streaming response
+        return StreamingResponse(
+            video_bytes,
+            media_type="video/mp4",
+            headers={
+                "Content-Disposition": f"inline; filename=generated_video.mp4"
+            }
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Video generation failed: {str(e)}"
         )
 
 # Optional: Add CORS middleware if you need to access from browser
