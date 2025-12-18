@@ -20,7 +20,7 @@ app = FastAPI(
 
 # Initialize Hugging Face client
 client = InferenceClient(
-    provider="auto",
+    provider="replicate",
     api_key=os.environ.get("HF_TOKEN"),
 )
 
