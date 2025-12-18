@@ -81,11 +81,11 @@ async def health_check():
         "hf_token_configured": bool(hf_token)
     }
 
-@app.post("/generate")
+@app.post("/generate", response_class=StreamingResponse)
 async def generate_image(request: ImageGenerationRequest):
     """
     Generate an image from a text prompt using FLUX.1-schnell model
-    
+
     Returns the image directly as a PNG file (16:9 aspect ratio by default)
     """
     try:
@@ -126,7 +126,7 @@ async def generate_image(request: ImageGenerationRequest):
             detail=f"Image generation failed: {str(e)}"
         )
 
-@app.post("/generate-video")
+@app.post("/generate-video", response_class=StreamingResponse)
 async def generate_video(request: VideoGenerationRequest):
     """
     Generate a video from a text prompt using text-to-video models
@@ -142,25 +142,14 @@ async def generate_video(request: VideoGenerationRequest):
             )
 
         # Generate video using Hugging Face Inference API
+        # text_to_video returns bytes directly
         video = client.text_to_video(
             request.prompt,
             model=request.model,
         )
 
-        # The text_to_video method returns a file path to the generated video
-        # We need to read the video file and stream it back
-        if isinstance(video, str):
-            # If video is a file path, read it
-            with open(video, "rb") as video_file:
-                video_bytes = io.BytesIO(video_file.read())
-        elif isinstance(video, bytes):
-            # If video is already bytes
-            video_bytes = io.BytesIO(video)
-        else:
-            # If video is a file-like object
-            video_bytes = io.BytesIO(video.read())
-
-        video_bytes.seek(0)
+        # Convert bytes to BytesIO for streaming
+        video_bytes = io.BytesIO(video)
 
         # Return video as streaming response
         return StreamingResponse(
