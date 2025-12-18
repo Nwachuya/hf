@@ -1,10 +1,11 @@
-# HuggingFace Image Generator API
+# HuggingFace Image & Video Generator API
 
-A simple REST API for generating images from text prompts using Hugging Face's FLUX.1-schnell model.
+A REST API for generating images and videos from text prompts using Hugging Face models.
 
 ## Features
 
-- 🚀 Fast image generation using FLUX.1-schnell model
+- 🖼️ Fast image generation using FLUX.1-schnell model
+- 🎥 Text-to-video generation using Wan-AI models
 - 📐 Customizable image dimensions (default 16:9 aspect ratio)
 - 🎨 Adjustable generation parameters (guidance scale, inference steps)
 - 📖 Automatic API documentation with Swagger UI
@@ -42,6 +43,24 @@ Generate an image from a text prompt
 
 **Response:**
 Returns the generated image directly as a PNG file
+
+### `POST /generate-video`
+Generate a video from a text prompt
+
+**Request Body:**
+```json
+{
+  "prompt": "A young man walking on the street",
+  "model": "Wan-AI/Wan2.2-T2V-A14B"
+}
+```
+
+**Parameters:**
+- `prompt` (required): Text description of the video to generate
+- `model` (optional, default: "Wan-AI/Wan2.2-T2V-A14B"): Text-to-video model to use
+
+**Response:**
+Returns the generated video directly as an MP4 file
 
 ## Setup
 
@@ -162,8 +181,8 @@ git push -u origin main
 
 ### Using cURL
 
+**Generate an image:**
 ```bash
-# Generate an image
 curl -X POST "http://localhost:8000/generate" \
   -H "Content-Type: application/json" \
   -d '{
@@ -174,8 +193,20 @@ curl -X POST "http://localhost:8000/generate" \
   --output generated_image.png
 ```
 
+**Generate a video:**
+```bash
+curl -X POST "http://localhost:8000/generate-video" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "A young man walking on the street",
+    "model": "Wan-AI/Wan2.2-T2V-A14B"
+  }' \
+  --output generated_video.mp4
+```
+
 ### Using Python requests
 
+**Generate an image:**
 ```python
 import requests
 
@@ -197,8 +228,29 @@ else:
     print(f"Error: {response.json()}")
 ```
 
+**Generate a video:**
+```python
+import requests
+
+response = requests.post(
+    "http://localhost:8000/generate-video",
+    json={
+        "prompt": "A young man walking on the street",
+        "model": "Wan-AI/Wan2.2-T2V-A14B"
+    }
+)
+
+if response.status_code == 200:
+    with open("generated_video.mp4", "wb") as f:
+        f.write(response.content)
+    print("Video saved!")
+else:
+    print(f"Error: {response.json()}")
+```
+
 ### Using JavaScript/Fetch
 
+**Generate an image:**
 ```javascript
 fetch('http://localhost:8000/generate', {
   method: 'POST',
@@ -217,6 +269,28 @@ fetch('http://localhost:8000/generate', {
   const a = document.createElement('a');
   a.href = url;
   a.download = 'generated_image.png';
+  a.click();
+});
+```
+
+**Generate a video:**
+```javascript
+fetch('http://localhost:8000/generate-video', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    prompt: 'A young man walking on the street',
+    model: 'Wan-AI/Wan2.2-T2V-A14B'
+  })
+})
+.then(response => response.blob())
+.then(blob => {
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'generated_video.mp4';
   a.click();
 });
 ```
@@ -249,10 +323,18 @@ Once running, visit http://localhost:8000/docs to access the interactive Swagger
 
 ## Model Information
 
+### Image Generation
 This API uses the **FLUX.1-schnell** model from Black Forest Labs:
 - Optimized for speed (schnell = fast in German)
 - High-quality image generation
 - Default 4 inference steps for quick generation
+- Hosted on Hugging Face Inference API
+
+### Video Generation
+This API uses the **Wan-AI/Wan2.2-T2V-A14B** model by default:
+- Advanced text-to-video generation
+- High-quality video output
+- Supports various video generation scenarios
 - Hosted on Hugging Face Inference API
 
 ## Troubleshooting
