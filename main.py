@@ -18,8 +18,15 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Initialize Hugging Face client
-client = InferenceClient(
+# Initialize Hugging Face clients
+# Image generation uses auto provider
+image_client = InferenceClient(
+    provider="auto",
+    api_key=os.environ.get("HF_TOKEN"),
+)
+
+# Video generation uses replicate provider
+video_client = InferenceClient(
     provider="replicate",
     api_key=os.environ.get("HF_TOKEN"),
 )
@@ -97,7 +104,7 @@ async def generate_image(request: ImageGenerationRequest):
             )
         
         # Generate image using Hugging Face Inference API
-        image = client.text_to_image(
+        image = image_client.text_to_image(
             request.prompt,
             model="black-forest-labs/FLUX.1-schnell",
             width=request.width,
@@ -143,7 +150,7 @@ async def generate_video(request: VideoGenerationRequest):
 
         # Generate video using Hugging Face Inference API
         # text_to_video returns bytes directly
-        video = client.text_to_video(
+        video = video_client.text_to_video(
             request.prompt,
             model=request.model,
         )
