@@ -42,7 +42,7 @@ class ImageGenerationRequest(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "prompt": "Astronaut riding a horse on Mars, cinematic lighting, 4k",
+                "prompt": "3 well adorned African priests riding horses in early Jerusalem, following the stars, cinematic lighting, 4k",
                 "width": 1024,
                 "height": 576,
                 "guidance_scale": 7.5,
@@ -61,7 +61,7 @@ class VideoGenerationRequest(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "prompt": "A young man walking on the street",
+                "prompt": "A young man walking on the street waving an Algerian flag, smiling",
                 "model": "Wan-AI/Wan2.2-T2V-A14B"
             }
         }
