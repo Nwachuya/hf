@@ -91,7 +91,7 @@ async def root():
             }
             
             .container {
-                max-width: 1200px;
+                max-width: 1400px;
                 margin: 0 auto;
             }
             
@@ -239,7 +239,7 @@ async def root():
                 margin-top: 15px;
             }
             
-            .info-section {
+            .api-section {
                 background: white;
                 border-radius: 15px;
                 padding: 30px;
@@ -247,25 +247,138 @@ async def root():
                 margin-top: 30px;
             }
             
-            .info-section h2 {
+            .api-section h2 {
                 color: #667eea;
-                margin-bottom: 20px;
+                margin-bottom: 25px;
+                font-size: 1.8rem;
             }
             
-            .endpoint-list {
-                list-style: none;
+            .api-section h3 {
+                color: #444;
+                margin-top: 25px;
+                margin-bottom: 15px;
+                font-size: 1.3rem;
             }
             
-            .endpoint-list li {
-                padding: 12px;
-                margin-bottom: 10px;
-                background: #f5f5f5;
+            .endpoint {
+                background: #f8f9fa;
+                border-left: 4px solid #667eea;
+                padding: 20px;
+                margin-bottom: 25px;
                 border-radius: 8px;
+            }
+            
+            .endpoint-header {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                margin-bottom: 15px;
+            }
+            
+            .method {
+                display: inline-block;
+                padding: 6px 12px;
+                border-radius: 5px;
+                font-weight: 700;
+                font-size: 0.9rem;
                 font-family: 'Courier New', monospace;
             }
             
-            .endpoint-list li strong {
-                color: #667eea;
+            .method.post {
+                background: #4caf50;
+                color: white;
+            }
+            
+            .method.get {
+                background: #2196f3;
+                color: white;
+            }
+            
+            .endpoint-path {
+                font-family: 'Courier New', monospace;
+                font-size: 1.1rem;
+                color: #333;
+                font-weight: 600;
+            }
+            
+            .endpoint-description {
+                color: #666;
+                margin-bottom: 15px;
+                line-height: 1.6;
+            }
+            
+            .code-block {
+                background: #1e1e1e;
+                color: #d4d4d4;
+                padding: 20px;
+                border-radius: 8px;
+                overflow-x: auto;
+                font-family: 'Courier New', monospace;
+                font-size: 0.9rem;
+                line-height: 1.5;
+                margin-top: 10px;
+            }
+            
+            .code-block .key {
+                color: #9cdcfe;
+            }
+            
+            .code-block .string {
+                color: #ce9178;
+            }
+            
+            .code-block .number {
+                color: #b5cea8;
+            }
+            
+            .quick-links {
+                display: flex;
+                gap: 15px;
+                margin-bottom: 30px;
+                flex-wrap: wrap;
+            }
+            
+            .quick-link {
+                display: inline-block;
+                padding: 12px 24px;
+                background: #667eea;
+                color: white;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: 600;
+                transition: transform 0.2s, box-shadow 0.2s;
+            }
+            
+            .quick-link:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            }
+            
+            .param-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 10px;
+            }
+            
+            .param-table th,
+            .param-table td {
+                text-align: left;
+                padding: 12px;
+                border-bottom: 1px solid #e0e0e0;
+            }
+            
+            .param-table th {
+                background: #f5f5f5;
+                font-weight: 600;
+                color: #333;
+            }
+            
+            .param-table code {
+                background: #f5f5f5;
+                padding: 2px 6px;
+                border-radius: 3px;
+                font-family: 'Courier New', monospace;
+                font-size: 0.9em;
             }
             
             @media (max-width: 768px) {
@@ -279,6 +392,19 @@ async def root():
                 
                 h1 {
                     font-size: 2rem;
+                }
+                
+                .endpoint-header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+                
+                .quick-links {
+                    flex-direction: column;
+                }
+                
+                .quick-link {
+                    text-align: center;
                 }
             }
         </style>
@@ -342,15 +468,181 @@ async def root():
                 </div>
             </div>
             
-            <!-- API Information -->
-            <div class="info-section">
-                <h2>📡 API Endpoints</h2>
-                <ul class="endpoint-list">
-                    <li><strong>POST</strong> /generate - Generate images from text prompts</li>
-                    <li><strong>POST</strong> /generate-video - Generate videos from text prompts</li>
-                    <li><strong>GET</strong> /health - Health check endpoint</li>
-                    <li><strong>GET</strong> /docs - Interactive API documentation (Swagger UI)</li>
-                </ul>
+            <!-- API Documentation -->
+            <div class="api-section">
+                <h2>📡 API Documentation</h2>
+                
+                <div class="quick-links">
+                    <a href="/docs" class="quick-link" target="_blank">📖 Swagger UI Docs</a>
+                    <a href="/redoc" class="quick-link" target="_blank">📄 ReDoc Documentation</a>
+                    <a href="/health" class="quick-link" target="_blank">💚 Health Check</a>
+                </div>
+                
+                <h3>Available Endpoints</h3>
+                
+                <!-- Image Generation Endpoint -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method post">POST</span>
+                        <span class="endpoint-path">/generate</span>
+                    </div>
+                    <p class="endpoint-description">
+                        Generate an image from a text prompt using the FLUX.1-schnell model. Returns a PNG image file.
+                    </p>
+                    
+                    <strong>Request Body:</strong>
+                    <table class="param-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>prompt</code></td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>Text description of the image to generate</td>
+                            </tr>
+                            <tr>
+                                <td><code>width</code></td>
+                                <td>integer</td>
+                                <td>No</td>
+                                <td>Image width in pixels (256-2048, default: 1024)</td>
+                            </tr>
+                            <tr>
+                                <td><code>height</code></td>
+                                <td>integer</td>
+                                <td>No</td>
+                                <td>Image height in pixels (256-2048, default: 576)</td>
+                            </tr>
+                            <tr>
+                                <td><code>guidance_scale</code></td>
+                                <td>float</td>
+                                <td>No</td>
+                                <td>Guidance scale for generation (1.0-20.0, default: 7.5)</td>
+                            </tr>
+                            <tr>
+                                <td><code>num_inference_steps</code></td>
+                                <td>integer</td>
+                                <td>No</td>
+                                <td>Number of inference steps (1-50, default: 4)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <strong>Example cURL Request:</strong>
+                    <div class="code-block">curl -X POST "http://localhost:8000/generate" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "prompt": "3 well adorned African priests riding horses in early Jerusalem, following the stars, cinematic lighting, 4k",
+    "width": 1024,
+    "height": 576,
+    "guidance_scale": 7.5,
+    "num_inference_steps": 4
+  }' \\
+  --output generated_image.png</div>
+                    
+                    <strong>Example Python Request:</strong>
+                    <div class="code-block">import requests
+
+response = requests.post(
+    "http://localhost:8000/generate",
+    json={
+        "prompt": "3 well adorned African priests riding horses in early Jerusalem, following the stars, cinematic lighting, 4k",
+        "width": 1024,
+        "height": 576,
+        "guidance_scale": 7.5,
+        "num_inference_steps": 4
+    }
+)
+
+with open("generated_image.png", "wb") as f:
+    f.write(response.content)</div>
+                </div>
+                
+                <!-- Video Generation Endpoint -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method post">POST</span>
+                        <span class="endpoint-path">/generate-video</span>
+                    </div>
+                    <p class="endpoint-description">
+                        Generate a video from a text prompt using text-to-video models. Returns an MP4 video file.
+                    </p>
+                    
+                    <strong>Request Body:</strong>
+                    <table class="param-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>prompt</code></td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>Text description of the video to generate</td>
+                            </tr>
+                            <tr>
+                                <td><code>model</code></td>
+                                <td>string</td>
+                                <td>No</td>
+                                <td>Model to use (default: "Wan-AI/Wan2.2-T2V-A14B")</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <strong>Example cURL Request:</strong>
+                    <div class="code-block">curl -X POST "http://localhost:8000/generate-video" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "prompt": "A young man walking on the street waving an Algerian flag, smiling",
+    "model": "Wan-AI/Wan2.2-T2V-A14B"
+  }' \\
+  --output generated_video.mp4</div>
+                    
+                    <strong>Example Python Request:</strong>
+                    <div class="code-block">import requests
+
+response = requests.post(
+    "http://localhost:8000/generate-video",
+    json={
+        "prompt": "A young man walking on the street waving an Algerian flag, smiling",
+        "model": "Wan-AI/Wan2.2-T2V-A14B"
+    }
+)
+
+with open("generated_video.mp4", "wb") as f:
+    f.write(response.content)</div>
+                </div>
+                
+                <!-- Health Check Endpoint -->
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-path">/health</span>
+                    </div>
+                    <p class="endpoint-description">
+                        Check API health status and verify HuggingFace token configuration.
+                    </p>
+                    
+                    <strong>Example cURL Request:</strong>
+                    <div class="code-block">curl -X GET "http://localhost:8000/health"</div>
+                    
+                    <strong>Example Response:</strong>
+                    <div class="code-block">{
+  "status": "healthy",
+  "hf_token_configured": true
+}</div>
+                </div>
             </div>
         </div>
         
